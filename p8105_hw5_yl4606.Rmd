@@ -2,7 +2,7 @@
 title: "hw5"
 author: "Yubei Liang"
 date: "11/12/2020"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
