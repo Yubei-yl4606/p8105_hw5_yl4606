@@ -1,0 +1,68 @@
+---
+title: "hw5"
+author: "Yubei Liang"
+date: "11/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rvest)
+
+knitr::opts_chunk$set(
+  fig.width = 6, 
+  fig.asp = .6,
+  out.width = "90%"
+)
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+
+# Problem 2
+
+## tidy the data
+```{r message = FALSE}
+path_df <- 
+  tibble(
+    path = list.files("data/lda_data")
+    ) %>% 
+  mutate(
+    path  = str_c("data/lda_data/", path),
+    data  = map(.x = path, ~read_csv(.x)),
+    path = str_sub(path, 15,-5)
+    ) %>% 
+  separate(path, into = c("control_arm", "subject_ID"), sep = "_") %>% 
+  mutate(
+    control_arm = str_replace(control_arm, "con", "control"),
+    control_arm = str_replace(control_arm, "exp", "experiment")
+  ) %>% 
+  unnest(data) %>% 
+  pivot_longer(
+    week_1:week_8,
+    names_to = "week",
+    values_to = "observation"
+  ) %>% 
+  mutate(
+    week = str_sub(week, -1)
+  )
+
+head(path_df)
+```
+
+## spaghetti plot
+```{r message = FALSE}
+path_df %>% 
+  ggplot(aes(x = week, y = observation, group = interaction(control_arm, subject_ID), color = control_arm)) +
+  geom_point() +
+  geom_line()
+```
+Comment: Subjects of control group (purple) reach nearly the same values in week 8 as in week 1. However, observations from experimental group (yellow) increase overall from range (-1.25, 3.75) to range (3.15, 7.5). Therefore, there is a significant difference in performance of control group v.s. experimental group.
+
+
+
